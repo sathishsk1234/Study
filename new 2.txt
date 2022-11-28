@@ -1,0 +1,128 @@
+package sun.io;
+
+import java.io.UnsupportedEncodingException;
+
+// Referenced classes of package sun.io:
+//            ConversionBufferFullException, Converters, MalformedInputException, UnknownCharacterException
+
+/**
+ * @deprecated Class ByteToCharConverter is deprecated
+ */
+
+public abstract class ByteToCharConverter
+{
+
+    protected boolean subMode;
+    protected char subChars[] = {
+        '\uFFFD'
+    };
+    protected int charOff;
+    protected int byteOff;
+    protected int badInputLength;
+
+    public ByteToCharConverter()
+    {
+        subMode = true;
+    }
+
+    public static ByteToCharConverter getDefault()
+    {
+        Object obj = Converters.newDefaultConverter(0);
+        return (ByteToCharConverter)obj;
+    }
+
+    public static ByteToCharConverter getConverter(String s)
+        throws UnsupportedEncodingException
+    {
+        Object obj = Converters.newConverter(0, s);
+        return (ByteToCharConverter)obj;
+    }
+
+    public abstract String getCharacterEncoding();
+
+    public abstract int convert(byte abyte0[], int i, int j, char ac[], int k, int l)
+        throws MalformedInputException, UnknownCharacterException, ConversionBufferFullException;
+
+    public char[] convertAll(byte abyte0[])
+        throws MalformedInputException
+    {
+        Exception exception;
+        reset();
+        boolean flag = subMode;
+        subMode = true;
+        char ac[] = new char[getMaxCharsPerByte() * abyte0.length];
+        char ac2[];
+        try
+        {
+            int i = convert(abyte0, 0, abyte0.length, ac, 0, ac.length);
+            i += flush(ac, i, ac.length);
+            char ac1[] = new char[i];
+            System.arraycopy(ac, 0, ac1, 0, i);
+            ac2 = ac1;
+        }
+        catch(ConversionBufferFullException conversionbufferfullexception)
+        {
+            throw new InternalError("this.getMaxCharsBerByte returned bad value");
+        }
+        catch(UnknownCharacterException unknowncharacterexception)
+        {
+            throw new InternalError();
+        }
+        finally
+        {
+            subMode = flag;
+        }
+        subMode = flag;
+        return ac2;
+        throw exception;
+    }
+
+    public abstract int flush(char ac[], int i, int j)
+        throws MalformedInputException, ConversionBufferFullException;
+
+    public abstract void reset();
+
+    public int getMaxCharsPerByte()
+    {
+        return 1;
+    }
+
+    public int getBadInputLength()
+    {
+        return badInputLength;
+    }
+
+    public int nextCharIndex()
+    {
+        return charOff;
+    }
+
+    public int nextByteIndex()
+    {
+        return byteOff;
+    }
+
+    public void setSubstitutionMode(boolean flag)
+    {
+        subMode = flag;
+    }
+
+    public void setSubstitutionChars(char ac[])
+        throws IllegalArgumentException
+    {
+        if(ac.length > getMaxCharsPerByte())
+        {
+            throw new IllegalArgumentException();
+        } else
+        {
+            subChars = new char[ac.length];
+            System.arraycopy(ac, 0, subChars, 0, ac.length);
+            return;
+        }
+    }
+
+    public String toString()
+    {
+        return (new StringBuilder()).append("ByteToCharConverter: ").append(getCharacterEncoding()).toString();
+    }
+}
