@@ -1,0 +1,57 @@
+package sun.io;
+
+
+// Referenced classes of package sun.io:
+//            ByteToCharConverter, ConversionBufferFullException, UnknownCharacterException
+
+public class ByteToCharASCII extends ByteToCharConverter
+{
+
+    public ByteToCharASCII()
+    {
+    }
+
+    public String getCharacterEncoding()
+    {
+        return "ASCII";
+    }
+
+    public int flush(char ac[], int i, int j)
+    {
+        byteOff = charOff = 0;
+        return 0;
+    }
+
+    public int convert(byte abyte0[], int i, int j, char ac[], int k, int l)
+        throws ConversionBufferFullException, UnknownCharacterException
+    {
+        charOff = k;
+        for(byteOff = i; byteOff < j;)
+        {
+            if(charOff >= l)
+            {
+                throw new ConversionBufferFullException();
+            }
+            byte byte0 = abyte0[byteOff++];
+            if(byte0 >= 0)
+            {
+                ac[charOff++] = (char)byte0;
+            } else
+            if(subMode)
+            {
+                ac[charOff++] = '\uFFFD';
+            } else
+            {
+                badInputLength = 1;
+                throw new UnknownCharacterException();
+            }
+        }
+
+        return charOff - k;
+    }
+
+    public void reset()
+    {
+        byteOff = charOff = 0;
+    }
+}
